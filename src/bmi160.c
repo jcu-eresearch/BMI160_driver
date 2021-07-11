@@ -1377,7 +1377,7 @@ int8_t bmi160_get_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, const stru
     int8_t rslt = BMI160_OK;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->read == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1390,10 +1390,11 @@ int8_t bmi160_get_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, const stru
         /* Configuring reg_addr for SPI Interface */
         if (dev->intf == BMI160_SPI_INTF)
         {
+//            printf("======-------===========--------=========-------========");
             reg_addr = (reg_addr | BMI160_SPI_RD_MASK);
         }
 
-        rslt = dev->read(dev->id, reg_addr, data, len);
+        rslt = bmi160_read_reg(dev->id, reg_addr, data, len, dev);
     }
 
     return rslt;
@@ -1409,7 +1410,7 @@ int8_t bmi160_set_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, const stru
     uint8_t count = 0;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->write == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1428,10 +1429,10 @@ int8_t bmi160_set_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, const stru
         if ((dev->prev_accel_cfg.power == BMI160_ACCEL_NORMAL_MODE) ||
             (dev->prev_gyro_cfg.power == BMI160_GYRO_NORMAL_MODE))
         {
-            rslt = dev->write(dev->id, reg_addr, data, len);
+            rslt = bmi160_write_reg(dev->id, reg_addr, data, len, dev);
 
             /* Kindly refer bmi160 data sheet section 3.2.4 */
-            dev->delay_ms(1);
+            bmi160_delay_ms(1);
 
         }
         else
@@ -1440,11 +1441,11 @@ int8_t bmi160_set_regs(uint8_t reg_addr, uint8_t *data, uint16_t len, const stru
              * suspend & low power mode */
             for (; count < len; count++)
             {
-                rslt = dev->write(dev->id, reg_addr, &data[count], 1);
+                rslt = bmi160_write_reg(dev->id, reg_addr, &data[count], 1, dev);
                 reg_addr++;
 
                 /* Kindly refer bmi160 data sheet section 3.2.4 */
-                dev->delay_ms(1);
+                bmi160_delay_ms(1);
 
             }
         }
@@ -1516,7 +1517,7 @@ int8_t bmi160_soft_reset(struct bmi160_dev *dev)
     uint8_t data = BMI160_SOFT_RESET_CMD;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1524,7 +1525,7 @@ int8_t bmi160_soft_reset(struct bmi160_dev *dev)
     {
         /* Reset the device */
         rslt = bmi160_set_regs(BMI160_COMMAND_REG_ADDR, &data, 1, dev);
-        dev->delay_ms(BMI160_SOFT_RESET_DELAY_MS);
+        bmi160_delay_ms(BMI160_SOFT_RESET_DELAY_MS);
         if ((rslt == BMI160_OK) && (dev->intf == BMI160_SPI_INTF))
         {
             /* Dummy read of 0x7F register to enable SPI Interface
@@ -1551,7 +1552,7 @@ int8_t bmi160_set_sens_conf(struct bmi160_dev *dev)
     int8_t rslt = BMI160_OK;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1584,7 +1585,7 @@ int8_t bmi160_get_sens_conf(struct bmi160_dev *dev)
     int8_t rslt = BMI160_OK;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1608,7 +1609,7 @@ int8_t bmi160_set_power_mode(struct bmi160_dev *dev)
     int8_t rslt = 0;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1633,7 +1634,7 @@ int8_t bmi160_get_power_mode(struct bmi160_pmu_status *pmu_status, const struct 
     uint8_t power_mode = 0;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1892,7 +1893,7 @@ int8_t bmi160_aux_read(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, const 
     uint16_t map_len = 0;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->read == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1925,7 +1926,7 @@ int8_t bmi160_aux_write(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, const
     uint8_t count = 0;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->write == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -1935,12 +1936,12 @@ int8_t bmi160_aux_write(uint8_t reg_addr, uint8_t *aux_data, uint16_t len, const
         {
             /* set data to write */
             rslt = bmi160_set_regs(BMI160_AUX_IF_4_ADDR, aux_data, 1, dev);
-            dev->delay_ms(BMI160_AUX_COM_DELAY);
+            bmi160_delay_ms(BMI160_AUX_COM_DELAY);
             if (rslt == BMI160_OK)
             {
                 /* set address to write */
                 rslt = bmi160_set_regs(BMI160_AUX_IF_3_ADDR, &reg_addr, 1, dev);
-                dev->delay_ms(BMI160_AUX_COM_DELAY);
+                bmi160_delay_ms(BMI160_AUX_COM_DELAY);
                 if (rslt == BMI160_OK && (count < len - 1))
                 {
                     aux_data++;
@@ -2004,7 +2005,7 @@ int8_t bmi160_set_aux_auto_mode(uint8_t *data_addr, struct bmi160_dev *dev)
         {
             /* Write the aux. address to read in 0x4D of BMI160*/
             rslt = bmi160_set_regs(BMI160_AUX_IF_2_ADDR, data_addr, 1, dev);
-            dev->delay_ms(BMI160_AUX_COM_DELAY);
+            bmi160_delay_ms(BMI160_AUX_COM_DELAY);
             if (rslt == BMI160_OK)
             {
                 /* Configure the polling ODR for
@@ -2052,7 +2053,7 @@ int8_t bmi160_config_aux_mode(const struct bmi160_dev *dev)
         /* Set the secondary interface address and manual mode
          * along with burst read length */
         rslt = bmi160_set_regs(BMI160_AUX_IF_0_ADDR, &aux_if[0], 2, dev);
-        dev->delay_ms(BMI160_AUX_COM_DELAY);
+        bmi160_delay_ms(BMI160_AUX_COM_DELAY);
     }
 
     return rslt;
@@ -2668,7 +2669,7 @@ int8_t bmi160_update_nvm(struct bmi160_dev const *dev)
                     if (data != BMI160_ENABLE)
                     {
                         /* Delay to update NVM */
-                        dev->delay_ms(25);
+                        bmi160_delay_ms(25);
                     }
                 }
             }
@@ -3112,7 +3113,7 @@ static int8_t null_ptr_check(const struct bmi160_dev *dev)
 {
     int8_t rslt;
 
-    if ((dev == NULL) || (dev->read == NULL) || (dev->write == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -3514,7 +3515,7 @@ static int8_t set_accel_pwr(struct bmi160_dev *dev)
                 /* Add delay of 3.8 ms - refer data sheet table 24*/
                 if (dev->prev_accel_cfg.power == BMI160_ACCEL_SUSPEND_MODE)
                 {
-                    dev->delay_ms(BMI160_ACCEL_DELAY_MS);
+                    bmi160_delay_ms(BMI160_ACCEL_DELAY_MS);
                 }
 
                 dev->prev_accel_cfg.power = dev->accel_cfg.power;
@@ -3592,14 +3593,14 @@ static int8_t set_gyro_pwr(struct bmi160_dev *dev)
             if (dev->prev_gyro_cfg.power == BMI160_GYRO_SUSPEND_MODE)
             {
                 /* Delay of 80 ms - datasheet Table 24 */
-                dev->delay_ms(BMI160_GYRO_DELAY_MS);
+                bmi160_delay_ms(BMI160_GYRO_DELAY_MS);
             }
             else if ((dev->prev_gyro_cfg.power == BMI160_GYRO_FASTSTARTUP_MODE) &&
                      (dev->gyro_cfg.power == BMI160_GYRO_NORMAL_MODE))
             {
                 /* This delay is required for transition from
                  * fast-startup mode to normal mode - datasheet Table 3 */
-                dev->delay_ms(10);
+                bmi160_delay_ms(10);
             }
             else
             {
@@ -4615,7 +4616,7 @@ static int8_t config_sec_if(const struct bmi160_dev *dev)
     if (rslt == BMI160_OK)
     {
         /* 0.5ms delay - refer datasheet table 24*/
-        dev->delay_ms(1);
+        bmi160_delay_ms(1);
         rslt = bmi160_get_regs(BMI160_IF_CONF_ADDR, &if_conf, 1, dev);
         if_conf |= (uint8_t)(1 << 5);
         if (rslt == BMI160_OK)
@@ -4644,7 +4645,7 @@ static int8_t config_aux_odr(const struct bmi160_dev *dev)
         /* Set the secondary interface ODR
          * i.e polling rate of secondary sensor */
         rslt = bmi160_set_regs(BMI160_AUX_ODR_ADDR, &aux_odr, 1, dev);
-        dev->delay_ms(BMI160_AUX_COM_DELAY);
+        bmi160_delay_ms(BMI160_AUX_COM_DELAY);
     }
 
     return rslt;
@@ -4716,7 +4717,7 @@ static int8_t extract_aux_read(uint16_t map_len,
     {
         /* set address to read */
         rslt = bmi160_set_regs(BMI160_AUX_IF_2_ADDR, &reg_addr, 1, dev);
-        dev->delay_ms(BMI160_AUX_COM_DELAY);
+        bmi160_delay_ms(BMI160_AUX_COM_DELAY);
         if (rslt == BMI160_OK)
         {
             rslt = bmi160_get_regs(read_addr, data, map_len, dev);
@@ -5237,7 +5238,7 @@ static int8_t accel_self_test_positive_excitation(struct bmi160_sensor_data *acc
     if (rslt == BMI160_OK)
     {
         /* Read the data after a delay of 50ms - refer datasheet  2.8.1 accel self test*/
-        dev->delay_ms(BMI160_ACCEL_SELF_TEST_DELAY);
+        bmi160_delay_ms(BMI160_ACCEL_SELF_TEST_DELAY);
         rslt = bmi160_get_sensor_data(BMI160_ACCEL_ONLY, accel_pos, NULL, dev);
     }
 
@@ -5259,7 +5260,7 @@ static int8_t accel_self_test_negative_excitation(struct bmi160_sensor_data *acc
     if (rslt == BMI160_OK)
     {
         /* Read the data after a delay of 50ms */
-        dev->delay_ms(BMI160_ACCEL_SELF_TEST_DELAY);
+        bmi160_delay_ms(BMI160_ACCEL_SELF_TEST_DELAY);
         rslt = bmi160_get_sensor_data(BMI160_ACCEL_ONLY, accel_neg, NULL, dev);
     }
 
@@ -5302,7 +5303,7 @@ static int8_t perform_gyro_self_test(const struct bmi160_dev *dev)
     if (rslt == BMI160_OK)
     {
         /* Validate the gyro self test a delay of 50ms */
-        dev->delay_ms(50);
+        bmi160_delay_ms(50);
 
         /* Validate the gyro self test results */
         rslt = validate_gyro_self_test(dev);
@@ -5328,7 +5329,7 @@ static int8_t enable_gyro_self_test(const struct bmi160_dev *dev)
         if (rslt == BMI160_OK)
         {
             /* Delay to enable gyro self test */
-            dev->delay_ms(15);
+            bmi160_delay_ms(15);
         }
     }
 
@@ -5373,7 +5374,7 @@ static int8_t set_fifo_full_int(const struct bmi160_int_settg *int_config, const
     int8_t rslt = BMI160_OK;
 
     /* Null-pointer check */
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -5424,7 +5425,7 @@ static int8_t set_fifo_watermark_int(const struct bmi160_int_settg *int_config, 
 {
     int8_t rslt = BMI160_OK;
 
-    if ((dev == NULL) || (dev->delay_ms == NULL))
+    if (dev == NULL)
     {
         rslt = BMI160_E_NULL_PTR;
     }
@@ -6400,7 +6401,7 @@ static int8_t trigger_foc(struct bmi160_offsets *offset, struct bmi160_dev const
             {
                 /* Maximum time of 250ms is given in 10
                  * steps of 25ms each - 250ms refer datasheet 2.9.1 */
-                dev->delay_ms(25);
+                bmi160_delay_ms(25);
 
                 /* Check the FOC status*/
                 rslt = get_foc_status(&foc_status, dev);

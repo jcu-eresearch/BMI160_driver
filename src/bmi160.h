@@ -977,6 +977,23 @@ int8_t bmi160_get_int_status(enum bmi160_int_status_sel int_status_sel,
                              union bmi160_int_status *int_status,
                              struct bmi160_dev const *dev);
 
+/*****************************************************************************/
+/* type definitions */
+
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific read functions of the user
+ */
+int8_t bmi160_read_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len, const struct bmi160_dev *dev);
+
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific write functions of the user
+ */
+int8_t bmi160_write_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t *read_data, uint16_t len, const struct bmi160_dev *dev);
+
+void bmi160_delay_ms(uint32_t period);
+
 /*************************** C++ guard macro *****************************/
 #ifdef __cplusplus
 }

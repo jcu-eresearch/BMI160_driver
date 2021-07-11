@@ -694,22 +694,6 @@
 #define BMI160_GET_LSB(var)                       (uint8_t)(var & BMI160_SET_LOW_BYTE)
 #define BMI160_GET_MSB(var)                       (uint8_t)((var & BMI160_SET_HIGH_BYTE) >> 8)
 
-/*****************************************************************************/
-/* type definitions */
-
-/*!
- * @brief Bus communication function pointer which should be mapped to
- * the platform specific read functions of the user
- */
-typedef int8_t (*bmi160_read_fptr_t)(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
-
-/*!
- * @brief Bus communication function pointer which should be mapped to
- * the platform specific write functions of the user
- */
-typedef int8_t (*bmi160_write_fptr_t)(uint8_t dev_addr, uint8_t reg_addr, uint8_t *read_data, uint16_t len);
-typedef void (*bmi160_delay_fptr_t)(uint32_t period);
-
 /*************************** Data structures *********************************/
 struct bmi160_pmu_status
 {
@@ -1657,14 +1641,7 @@ struct bmi160_dev
     /*! FIFO related configurations */
     struct bmi160_fifo_frame *fifo;
 
-    /*! Read function pointer */
-    bmi160_read_fptr_t read;
-
-    /*! Write function pointer */
-    bmi160_write_fptr_t write;
-
-    /*!  Delay function pointer */
-    bmi160_delay_fptr_t delay_ms;
+    void *ctx;
 
     /*! User set read/write length */
     uint16_t read_write_len;
