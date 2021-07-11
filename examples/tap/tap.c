@@ -144,6 +144,8 @@ static void init_bmi160(void)
 {
     int8_t rslt;
 
+    bmi160dev.expected_chip_id = BMI160_CHIP_ID;
+
     rslt = bmi160_init(&bmi160dev);
 
     if (rslt == BMI160_OK)
