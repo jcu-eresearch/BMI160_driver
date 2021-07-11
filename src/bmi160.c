@@ -1485,13 +1485,13 @@ int8_t bmi160_init(struct bmi160_dev *dev)
         /* Assign chip id as zero */
         dev->chip_id = 0;
 
-        while ((try--) && (dev->chip_id != BMI160_CHIP_ID))
+        while ((try--) && (dev->chip_id != dev->expected_chip_id))
         {
             /* Read chip_id */
             rslt = bmi160_get_regs(BMI160_CHIP_ID_ADDR, &dev->chip_id, 1, dev);
         }
 
-        if ((rslt == BMI160_OK) && (dev->chip_id == BMI160_CHIP_ID))
+        if ((rslt == BMI160_OK) && (dev->chip_id == dev->expected_chip_id))
         {
             dev->any_sig_sel = BMI160_BOTH_ANY_SIG_MOTION_DISABLED;
 

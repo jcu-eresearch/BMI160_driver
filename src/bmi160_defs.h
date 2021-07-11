@@ -1602,6 +1602,7 @@ struct bmi160_dev
 {
     /*! Chip Id */
     uint8_t chip_id;
+    uint8_t expected_chip_id;
 
     /*! Device Id */
     uint8_t id;
