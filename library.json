@@ -1,0 +1,33 @@
+{
+  "name": "BMI160",
+  "version": "0.0.1",
+  "description": "A C library to drive the Bosch BMI160 IMU chip.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jcu-eresearch/BMI160_driver.git"
+  },
+  "keywords": [
+    "Sensor"
+  ],
+  "authors": [
+    {
+      "name": "Bosch Sensortec GmbH"
+    },
+    {
+      "name": "NigelB",
+      "maintainer": true
+    }
+  ],
+  "frameworks": [
+    "*"
+  ],
+
+  "license": "BSD-3-Clause",
+  "build": {
+    "libArchive": false,
+    "srcFilter": [
+      "+<*.c>",
+      "+<*.h>"
+    ]
+  }
+}
